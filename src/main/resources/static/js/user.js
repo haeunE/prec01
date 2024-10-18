@@ -46,8 +46,20 @@ const userObject = {
          contentType: "application/json; charset=utf-8"
       }).done(function(response) {
          alert(response.data);
-         if(response.status == 200)
+         if(response.status == 200){
+			alert(response.data)
 			location.href = "/";
+		}else {
+			const result = response.data;
+			let msg = "";
+			if(result.username !=null)
+				msg+=result.username +"\n";
+			if(result.password !=null)
+				msg+=result.password +"\n";
+			if(result.email !=null)
+				msg+=result.email;
+			alert(msg);
+		}
       }).fail(function(error) {
          console.log(error);
       })  

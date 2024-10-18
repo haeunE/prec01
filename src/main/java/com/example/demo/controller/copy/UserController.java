@@ -1,11 +1,18 @@
 package com.example.demo.controller.copy;
 
-import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,12 +20,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.domain.ResponseDTO;
 import com.example.demo.domain.User;
+import com.example.demo.dto.UserDTO;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+
 
 
 
@@ -29,6 +37,9 @@ public class UserController {
 	private UserService userService;
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private ModelMapper modelMapper;
 	
 	@GetMapping("/auth/insertuser")
 	public String insertUser() {
@@ -37,8 +48,21 @@ public class UserController {
 	
 	@PostMapping("/auth/insertuser")
 	@ResponseBody
-	public ResponseDTO<?> insertUser(@RequestBody User user) {
-		//아이디 중복 검사 
+	public ResponseDTO<?> insertUser(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult) { // (유효성 검사할 객체, 유효성 검사후 결과를 받을 객체) 
+		
+		if(bindingResult.hasErrors()) {
+			Map<String, String> errors = new HashMap<>();
+			for(FieldError error : bindingResult.getFieldErrors()) {
+				System.out.println(error.getField());
+				System.out.println(error.getDefaultMessage());
+				errors.put(error.getField(), error.getDefaultMessage());
+			}
+			return new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(),errors);
+		}
+		
+		User user = modelMapper.map(userDTO, User.class);
+		
+//		//아이디 중복 검사 
 		User findUser = userService.getUser(user.getUsername());
 		if(findUser.getUsername() == null) {
 			userService.insertUser(user);

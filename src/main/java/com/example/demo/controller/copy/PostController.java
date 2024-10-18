@@ -1,10 +1,13 @@
 package com.example.demo.controller.copy;
 
 import java.net.http.HttpRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +16,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +30,7 @@ import com.example.demo.domain.PageDTO;
 import com.example.demo.domain.Post;
 import com.example.demo.domain.ResponseDTO;
 import com.example.demo.domain.User;
+import com.example.demo.dto.PostDTO;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.service.PostService;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,6 +48,9 @@ public class PostController {
 	@Autowired
 	private PostRepository postrepository;
 	
+	@Autowired
+	private ModelMapper modelMapper;
+	
 	@GetMapping("/post")
 	public String insertPost() {
 		return "post/insertPost";
@@ -49,9 +58,22 @@ public class PostController {
 	
 	@PostMapping("/post")
 	@ResponseBody
-	public ResponseDTO<?> insertPost(@RequestBody Post post, HttpSession session){
+	public ResponseDTO<?> insertPost(@Valid @RequestBody PostDTO postDTO, BindingResult bindingResult, Model model, HttpSession session){
+//		if(bindingResult.hasErrors()) {
+//			List<String> errorMsg = new ArrayList<>();
+//			for(FieldError error : bindingResult.getFieldErrors()) {
+//				errorMsg.add(error.getDefaultMessage());
+//			}
+//			
+//			
+//			model.addAttribute("errorPost",errorMsg);
+//			model.addAttribute("postdto",postDTO);
+//			return new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(),"다시 입력해주세요.");
+//		}
+		
+		modelMapper.map(postDTO, Post.class);
 		User getUser = (User)session.getAttribute("principal");
-		postservice.insertPost(post, getUser);
+		postservice.insertPost(postDTO, getUser);
 		return new ResponseDTO<>(HttpStatus.OK.value(),"게시물 등록 완료");
 	}
 	

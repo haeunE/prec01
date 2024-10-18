@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.Post;
 import com.example.demo.domain.User;
+import com.example.demo.dto.PostDTO;
 import com.example.demo.repository.PostRepository;
 
 @Service
@@ -18,8 +19,8 @@ public class PostService {
 	@Autowired
 	private PostRepository postrepository;
 	
-	public void insertPost(Post post,User user) {
-		post.setCnt(0);
+	public void insertPost(PostDTO postDTO,User user) {
+		PostDTO
 		post.setUser(user);
 		postrepository.save(post);
 		
